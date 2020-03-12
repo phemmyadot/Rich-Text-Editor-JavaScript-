@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rich Text Editor</title>
+</head>
+<body onload="onEditorLoad()">
+    <div class="richtext">
+        <div class="acions">
+            <button onclick="changeBackground()">background</button>
+            <button onclick="changeFont()">font</button>
+            <label>Enter advert text in the box below</label>
+            <!-- <button>preview</button> -->
+        </div>
+        <div id="editor" class="default" contenteditable="true"> 
+        </div>
+        <span id="counter"></span>
+    </div>
+    
+    <style>
+        .richtext {
+            position: relative;
+			max-width: 1000px;
+			margin: auto;
+        }
+        .default {
+            min-height: 400px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 600;
+            font-family: sans-serif;
+            background: #fff;
+            box-shadow: 0px 0px 5px 1px #ccc;
+            padding: 50PX;
+        }
+        .acions {
+            margin: 20px 0;
+        }
+		#editor {
+			max-height: 70vh;
+			overflow-y: auto; 
+		}
+        #counter {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            font-size: 13px;
+            font-weight: normal;
+            font-family: sans-serif;
+        }
+    </style>
+    
+    <script>
+    // ['#DAE2F8', '#D6A4A4'],
+    // ['#8E2DE2', '#4A00E0'],
+    // ['#8E2DE2', '#4A00E0'],
+    // ['#373B44', '#4286f4'],
+    // ['#FF0099', '#493240'],
+    // ['#2980B9', '#6DD5FA'],
+    // ['#12c2e9', '#c471ed'],
+    // ['#0F2027', '#2C5364'],
+    // ['#FBD786', '#f7797d'],
+    // ['#799F0C', '#FFE000'],
+    // ['#F7F8F8', '#ACBB78'],
+    // ['#CB356B', '#BD3F32'],
+    // ['#20002c', '#cbb4d4'],
+    // ['#200122', '#6f0000']
+        let currentColorIndex = 0;
+        const hexColors = [
+        'linear-gradient(to right, #011627 , #2F404E)',
+        'linear-gradient(to top, #DAE2F8 , #D6A4A4)',
+        'linear-gradient(to right, #8E2DE2 , #4A00E0)',
+        'linear-gradient(to left, #FF0099 , #493240)',
+        'linear-gradient(to left, #200122 , #6f0000)',
+        'linear-gradient(to left, #20002c , #cbb4d4)',
+        'linear-gradient(to left, #CB356B , #BD3F32)',
+        'linear-gradient(to left, #F7F8F8 , #ACBB78)'
+        ];
+        const fonts = [
+            'Brush Script MT, Brush Script Std, cursive', 
+            'Snell Roundhand, cursive', 
+            'Stencil Std, fantasy',
+            'Marker Felt, fantasy'
+        ]
+        let currentFont = 0;
+        const maximumLength = 300;
+        function changeBackground() {
+            if (hexColors.length > currentColorIndex) {
+
+                // set background gradient
+                const colorIndex = currentColorIndex;
+                const linearGrad = hexColors[colorIndex];
+                document.getElementById("editor").style.backgroundImage = linearGrad; 
+
+                //set font color
+                const element = document.getElementById('editor');
+                var background = window.getComputedStyle(element).getPropertyValue("background");
+
+                var colorSplits = background.split(/([rgb|rgba|+[\(]+[\d]+[\,]+[ \d]+[\, \d]+[ \d]+[\)])/);
+                colorArray = [];
+                  colorSplits.forEach(val => {
+                      if (val.includes('rgb')) {
+                          colorArray.push(val.match(/([0-9]+\.?[0-9]*)/g));
+                      }
+                  })
+				var p = 0.5;
+				var w = p * 2 - 1;
+				var w1 = (w/1+1) / 2;
+				var w2 = 1 - w1;
+				var c = [Math.round(parseInt(colorArray[1][0]) * w1 + parseInt(colorArray[2][0]) * w2),
+					Math.round(parseInt(colorArray[1][1]) * w1 + parseInt(colorArray[2][1]) * w2),
+					Math.round(parseInt(colorArray[1][2]) * w1 + parseInt(colorArray[2][2]) * w2)];
+                var val = Math.round(((c[0] * 299) + (c[1] * 587) + (c[2] * 114)) /1000);
+                if(val > 125) {
+                    document.getElementById("editor").style.color = '#000'; 
+                    document.getElementById("counter").style.color = '#000'; 
+                }else{ 
+                    document.getElementById("editor").style.color = '#fff'; 
+                    document.getElementById("counter").style.color = '#fff'; 
+                }
+                currentColorIndex = colorIndex + 1;
+            } else {
+                document.getElementById("editor").style.background = '#fff';
+                document.getElementById("editor").style.color = '#000'; 
+                document.getElementById("counter").style.color = '#000'; 
+                currentColorIndex = 0;
+            }
+        }
+        function changeFont() {
+            if (fonts.length > currentFont) {
+                const fontIndex = currentFont;
+                document.getElementById("editor").style.fontFamily = fonts[fontIndex]; 
+                currentFont = fontIndex + 1;
+            } else {
+                document.getElementById("editor").style.fontFamily = 'sans-serif'; 
+                currentFont = 0;
+            }
+        }
+        function onEditorLoad() {
+            document.getElementById("counter").innerHTML = `0 / ${maximumLength}`;
+        }
+        document.getElementById("editor").addEventListener('keydown', function(e) {
+            const currentLength = e.target.innerText.split('').length;
+            let content = e.target.innerText;
+
+            if (currentLength >= maximumLength && e.keyCode != 8) {
+                e.preventDefault();
+                return false;
+            }
+            document.getElementById("counter").innerHTML = `${currentLength + 1} / ${maximumLength}`;
+        })
+    </script>
+</body>
+</html>
